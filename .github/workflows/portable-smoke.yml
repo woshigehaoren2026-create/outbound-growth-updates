@@ -60,8 +60,8 @@ jobs:
             }
             if (!$ready) { if (Test-Path $stderr) { Get-Content $stderr }; throw 'App did not start' }
             $body = @{displayName='Test';email='test@example.invalid';password='synthetic-password-123';passwordConfirmation='synthetic-password-123'}
-            $setup = Invoke-WebRequest "$base/api/auth/setup" -Method POST -Headers @{Origin=$base} -Body $body -SessionVariable session -MaximumRedirection 0 -SkipHttpErrorCheck
-            if ($setup.StatusCode -ne 303 -or $setup.Headers.Location -notmatch '/dashboard$') { throw 'Synthetic setup failed' }
+            $setup = Invoke-WebRequest "$base/api/auth/setup" -Method POST -Headers @{Origin=$base} -Body $body -SessionVariable session -MaximumRedirection 3 -UseBasicParsing
+            if ($setup.StatusCode -ne 200 -or $setup.BaseResponse.RequestMessage.RequestUri.AbsolutePath -ne '/dashboard') { throw 'Synthetic setup failed' }
             $preview = Invoke-RestMethod "$base/api/products/bulk?kind=preview" -WebSession $session
             if ($preview.count -ne 0) { throw 'Installation was not empty' }
             foreach ($route in @('/quotes','/analytics','/social-video','/outreach')) {
